@@ -20,13 +20,34 @@ char *unknown = "U";
 void wifi_connect_and_fetch_data()
 {
   // Connect to Wifi
-  while (WiFi.status() != WL_CONNECTED) {
-    M5.EPD.Clear(true);
-    canvas1.setTextSize(10);
-    canvas1.drawString("Attempting wifi connection", 0, 0);
-    canvas1.pushCanvas(0, 0, UPDATE_MODE_GC16);
-    WiFi.begin(ssid, pass);
-    delay(500);
+  M5.EPD.Clear(true);
+  int wifi_attempt_count = 0;
+  WiFi.begin(ssid, pass);
+  canvas1.setTextSize(10);
+  canvas1.drawString("Attempting wifi connection", 0, 0);
+  canvas1.pushCanvas(0, 0, UPDATE_MODE_GC16);
+  while (WiFi.status() != WL_CONNECTED) {     
+
+    if (wifi_attempt_count % 10 == 0)
+    {
+      //Flash the screen to know we are still alive and trying to connect to wifi
+      //Only do this once every 5 seconds
+      M5.EPD.Clear(true);
+      canvas1.setTextSize(10);
+      canvas1.drawString("Attempting wifi connection", 0, 0);
+      canvas1.pushCanvas(0, 0, UPDATE_MODE_GC16);
+
+      //Restart the wifi connect attempt..
+      //FIXME: This still isn't great. We should probably check for an error status on the wifi connect attempt (assuming such a result is supplied by the Wifi API)
+      WiFi.begin(ssid, pass);
+      
+      delay(500);
+      
+      //FIXME: Put in an upper bound on attempts before giving up and just displaying the previously captured (or default) info
+      //        -- This is critical for the "low power" approach          
+    }
+
+    wifi_attempt_count++;
   }
 
   // Fetch weather JSON
@@ -165,8 +186,11 @@ void draw_sensors()
 
 void draw()
 {
-  M5.EPD.Clear(true);
   wifi_connect_and_fetch_data();
+  //Clear the screen after "connect and fetch".
+  //The connect and fetch function handles clearing the screen on its own during wifi status"ing"
+  M5.EPD.Clear(true);
+  
   draw_topbar();
   draw_weathernow();
   draw_forecast();
