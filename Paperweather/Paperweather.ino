@@ -205,7 +205,7 @@ void draw_weathericon()
   // Temp degrees
   canvas1.setTextSize(100);
   canvas1.setTextDatum(CC_DATUM);
-  canvas1.drawString(String(tempnow)+" °F", XMID, 320);
+  canvas1.drawString(String(tempnow), XMID, 320);
 
   // Desc of now
   canvas1.createRender(40, 256);
