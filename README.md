@@ -18,12 +18,11 @@ or similar).
 - Render an icon based on current condition (e.g. sun, snow, clouds, etc.)
 - Render current date/time and location of fetched data in top bar
 - Render current internal temperature & humidity sensors values in bottom bar
-- Sleep based on configurable interval seconds
+- Deep sleep based on configurable interval seconds
 
 **Todo:**
 
-- Figure out ESP deep sleep and replace delay with sleep for battery saving
-- Benchmark once ESP deep sleep is worked out
+- Benchmark ESP deep sleep
 
 ## Configuration
 Edit `Paperweather/config.h` to set:

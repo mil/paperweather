@@ -269,6 +269,9 @@ void draw()
 
   wifi_disconnect();
   json_value_free(json_root);
+
+  // Screen refresh time before we go to sleep..
+  delay(1000);
 }
 
 void setup()
@@ -285,5 +288,6 @@ void setup()
 void loop()
 {
   draw();
-  delay(1000 * refreshintervalseconds);
+  //delay(1000 * refreshintervalseconds);
+  M5.shutdown(refreshintervalseconds);
 }
