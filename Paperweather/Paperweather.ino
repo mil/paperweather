@@ -5,6 +5,7 @@
 #include "config.h"
 #include "M5EPD.h"
 #include "parson.h"
+#include "re.h"
 
 M5EPD_Canvas canvas1(&M5.EPD);
 HTTPClient client;
@@ -214,6 +215,26 @@ void draw_weathericon()
   canvas1.drawString(descnow, XMID, 410);
 }
 
+char *extract_mph_text(const char *longDesc) {
+  char *mph = (char *) malloc(40);
+  int match_length;
+  int match_idx = re_matchp(re_compile("[0-9]+ to [0-9]+ ?mph"), longDesc, &match_length);
+  if (match_idx == -1) {
+    match_idx = re_matchp(re_compile("[0-9]+ ?mph"), longDesc, &match_length);
+  }
+
+  if (match_idx != -1) {
+    mph[0] = ' ';
+    mph[1] = '/';
+    mph[2] = ' ';
+    memcpy(mph + 3, longDesc + match_idx, match_length);
+    mph[match_length + 3] = '\0';
+  } else {
+    mph[0] = '\0';
+  }
+  return mph;
+}
+
 void draw_forecast() {
   const JSON_Array *pname = json_object_dotget_array(json_value_get_object(json_root), "time.startPeriodName");
   const JSON_Array *temps = json_object_dotget_array(json_value_get_object(json_root), "data.temperature");
@@ -226,15 +247,15 @@ void draw_forecast() {
   for (i = 0; i < json_array_get_count(pname) && i < 5; i++) {
     const char *periodtime = json_array_get_string(pname, i);
     const char *perioddesc = json_array_get_string(desc_short, i);
+    char *windmph = extract_mph_text(json_array_get_string(desc_long, i));
     const char *highTemp = json_array_get_string(temps, (2*i)+1);
     const char *lowTemp = json_array_get_string(temps, (2*i));
-    sprintf(buf, "%s: %s / %s °F", periodtime, highTemp, lowTemp);
+    sprintf(buf, "%s: %s - %s °F %s", periodtime, lowTemp, highTemp, windmph);
     sprintf(buf2, "%s", perioddesc);
     addText(buf, XMID, 460 + (i*87), 30);    
     addText(buf2, XMID, 460 + (i*87)+30, 25);
   }
 }
-
 
 void draw_sensors()
 {
